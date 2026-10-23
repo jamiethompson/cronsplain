@@ -1,47 +1,62 @@
 # cronsplain
 
-`cronsplain` turns a standard five-field cron expression into plain English. It is a small Python CLI with no runtime dependencies and can also emit structured JSON for scripts.
+`cronsplain` explains standard five-field cron expressions in plain English or structured JSON.
 
 ```console
-$ cronsplain "0 9 * * MON-FRI"
-At 9:00 AM on Monday through Friday.
-
-$ cronsplain --json "*/15 9-17 * * 1-5"
-{
-  "input": "*/15 9-17 * * 1-5",
-  "normalized": "*/15 9-17 * * 1-5",
-  "description": "Every 15 minutes from 9:00 AM through 5:45 PM on Monday through Friday.",
-  "fields": {
-    "minute": {
-      "expression": "*/15",
-      "human": "0, 15, 30, and 45",
-      "values": [0, 15, 30, 45]
-    }
-  },
-  "warnings": []
-}
+$ cronsplain "*/15 9-17 * * MON-FRI"
+Every 15 minutes from 9:00 AM through 5:45 PM on Monday through Friday.
 ```
 
 ## Install
 
-Python 3.9 or newer is required. For an isolated command-line installation:
+Python 3.9 or newer is required. Install the command directly from GitHub with [pipx](https://pipx.pypa.io/):
 
 ```sh
-pipx install .
+pipx install git+https://github.com/jamiethompson/cronsplain.git
 ```
 
-For development:
+Then run it from any directory:
 
 ```sh
-python -m pip install -e .
-python -m unittest discover -s tests
+cronsplain "0 9 * * MON-FRI"
 ```
 
-The source checkout can also be run directly:
+To upgrade later:
 
 ```sh
-PYTHONPATH=src python -m cronsplain "30 8 * * 1-5"
-echo "0 0 1 JAN *" | PYTHONPATH=src python -m cronsplain --json
+pipx upgrade cronsplain
+```
+
+## Usage
+
+Pass the expression as one quoted argument:
+
+```console
+$ cronsplain "30 8 * * 1-5"
+At 8:30 AM on Monday through Friday.
+```
+
+Use `-j` or `--json` for structured output:
+
+```sh
+cronsplain -j "0 9 * * MON-FRI"
+cronsplain --json "0 9 * * MON-FRI"
+```
+
+The JSON object includes the original and normalized expressions, the English description, parsed values for every field, and any semantic warnings.
+
+Expressions can also be piped over standard input:
+
+```sh
+echo "0 0 1 JAN *" | cronsplain
+```
+
+Available options:
+
+```text
+-j, --json     Output structured JSON
+-h, --help     Show help
+-v, --version  Show the version
 ```
 
 ## Supported syntax
@@ -53,6 +68,30 @@ echo "0 0 1 JAN *" | PYTHONPATH=src python -m cronsplain --json
 - Sunday as either `0` or `7`
 
 When both day-of-month and day-of-week are restricted, the description and JSON warning call out traditional cron's OR behavior.
+
+## Development
+
+Clone the repository and create a virtual environment:
+
+```sh
+git clone https://github.com/jamiethompson/cronsplain.git
+cd cronsplain
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
+```
+
+Run the test suite:
+
+```sh
+python -m unittest discover -s tests
+```
+
+Run directly from a source checkout without installing:
+
+```sh
+PYTHONPATH=src python -m cronsplain "30 8 * * 1-5"
+```
 
 ## Library API
 
